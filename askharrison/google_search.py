@@ -18,3 +18,13 @@ def google_custom_search(q):
         return response.json()
     else:
         raise Exception(f"Failed to search: {response.status_code}, {response.text}")
+
+def run_multiple_google_queries(queries: List[str]):
+    """
+    Run multiple queries on google and return the results
+    """
+    query_to_results = {}
+    for query in queries:
+        response = google_custom_search(query)
+        query_to_results[query] = response
+    return query_to_results
