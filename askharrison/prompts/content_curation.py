@@ -19,6 +19,7 @@ def create_arxiv_filtering_prompt(problem_statement: str, doc_abstract: str):
     return prompt
 
 def create_google_reranking_prompt(problem_statement, search_results):
+    search_results_str = "\n".join([f"{idx+1}: {result}" for idx, result in enumerate(search_results)])
     return f"""rerank the search results based on the problem statement and criteria below:
     #### problem statement:
     {problem_statement}
@@ -29,9 +30,36 @@ def create_google_reranking_prompt(problem_statement, search_results):
     - recency of the content
     - any other criteria you think is important
     #### search results:
-    {search_results}
+    {search_results_str}
     #### output:
     return only and only a python list of dictionaries, each dictionary should contain the following keys:
+    {{
+        "idx": int : index of the search result,
+        "relevance": float : relevance score of the search result, from 0 to 10
+        "quality": float : quality score of the search result, from 0 to 10
+        "credibility": float : credibility score of the search result, from 0 to 10
+        "recency": float : recency score of the search result, from 0 to 10
+        "overall": float : overall score of the search result, from 0 to 100
+    }}
+    """
+
+def create_google_reranking_prompt(problem_statement, search_results, top_k:int=10):
+    search_results_str = "\n".join([f"{idx+1}: {result}" for idx, result in enumerate(search_results)])
+    top_k_str = f"return top {max(1, min(top_k, len(search_results)))} search results"
+    return f"""rerank the search results based on the problem statement and criteria below:
+    #### problem statement:
+    {problem_statement}
+    #### criteria:
+    - relevance to the problem statement
+    - quality of the content
+    - credibility of the source
+    - recency of the content
+    - any other criteria you think is important
+    #### search results:
+    {search_results_str}
+    #### output:
+    return only and only a python list of dictionaries, {top_k_str},
+    each dictionary should contain the following keys:
     {{
         "idx": int : index of the search result,
         "relevance": float : relevance score of the search result, from 0 to 10
