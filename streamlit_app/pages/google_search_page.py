@@ -17,6 +17,12 @@ class SearchResult:
     link: str
     snippet: str
 
+querytype_to_index = {
+    "disable": 0,
+    "normal": 1,
+    "diverse": 2
+}
+
 class SearchService:
     @staticmethod
     def expand_queries(problem: str, num_queries: int, query_type: str) -> List[str]:
@@ -24,6 +30,8 @@ class SearchService:
             return generate_search_queries(problem, num_queries, "google")
         elif query_type == "diverse":
             return generate_diffusion_search_queries(problem, num_queries, "google")
+        elif query_type == "disable":
+            return [problem]
         else:
             raise ValueError("Invalid query type")
 
@@ -80,7 +88,10 @@ class StreamlitApp:
         st.title("Advanced Search with Query Expansion and LLM Reranking")
 
         st.session_state.problem = st.text_input("Enter your search problem:", value=st.session_state.problem)
-        st.session_state.query_type = st.radio("Select query expansion type:", ("normal", "diverse"), index=0 if st.session_state.query_type == "normal" else 1)
+        st.session_state.query_type = st.radio("Select query expansion type:", 
+                                               ("disable","normal", "diverse"), 
+                                                index=querytype_to_index[st.session_state.query_type]
+                                               )
         st.session_state.num_queries = st.slider("Number of queries to generate:", 5, 20, st.session_state.num_queries)
 
         if st.button("Search"):
