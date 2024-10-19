@@ -1,0 +1,12 @@
+[Unit]
+Description=search_streamlit.service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/opt/shichenh/miniconda3/envs/askharrison_llm/bin/python -m streamlit run google_search_page.py --server.port 8510
+WorkingDirectory=/opt/shichenh/askharrison/streamlit_app/pages
+EnvironmentFile=/opt/shichenh/askharrison/service/askharrison_search.env
+
+[Install]
+WantedBy=default.target

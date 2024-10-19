@@ -3,6 +3,8 @@ import pandas as pd
 from typing import List, Dict
 from dataclasses import dataclass, asdict
 import json
+import os
+from PIL import Image
 
 # Importing required functions from the original script
 from askharrison.prompts.query_expansion import generate_search_queries, generate_diffusion_search_queries
@@ -84,7 +86,20 @@ class StreamlitApp:
             st.session_state.reranked_results = None
 
     def run(self):
-        st.set_page_config(page_title="Advanced Search App", layout="wide")
+        page_icon = Image.open("./icon.jpg")
+
+        # Streamlit App
+        st.set_page_config(page_title="Advanced Search App", 
+                        page_icon=page_icon, layout="wide")
+
+        if os.environ.get('HIDE_MENU', 'true') == 'true':
+                st.markdown("""
+                    <style>
+                    #MainMenu {visibility: hidden;}
+                    footer {visibility: hidden;}
+                    </style>
+                    """, unsafe_allow_html=True)
+
         st.title("Advanced Search with Query Expansion and LLM Reranking")
 
         st.session_state.problem = st.text_input("Enter your search problem:", value=st.session_state.problem)

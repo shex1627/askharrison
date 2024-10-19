@@ -1,0 +1,12 @@
+[Unit]
+Description=Cloudflared Tunnel
+After=askharrison_search_streamlit.service
+
+[Service]
+Type=simple
+ExecStart=cloudflared tunnel --config /opt/shichenh/.cloudflared/search.yml run
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target
