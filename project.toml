@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "askharrison"          
+version = "0.1.0"                # The initial release version
+description = "A short description of my package"
+authors = [
+  { name="Shicheng Huang", email="alistar.huang@gmail.com" }
+]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.7"
+
+# Specify your dependencies (if any)
+dependencies = [
+  "requests>=2.20.0",
+]
