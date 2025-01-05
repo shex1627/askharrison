@@ -1,0 +1,11 @@
+streamlit
+requests
+pyarxiv
+transformers
+ipykernel
+pandas
+numpy
+arxiv
+openai==1.29.0
+tiktoken
+Pillow

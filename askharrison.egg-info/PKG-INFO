@@ -1,3 +1,19 @@
 Metadata-Version: 2.1
 Name: askharrison
-Version: 0.1
+Version: 0.1.2rc0
+Summary: A package for the AskHarrison, including various GenAI tools
+Home-page: https://github.com/shex1627/askharrison
+Project-URL: Source Code, https://github.com/shex1627/askharrison
+Requires-Dist: streamlit
+Requires-Dist: requests
+Requires-Dist: pyarxiv
+Requires-Dist: transformers
+Requires-Dist: ipykernel
+Requires-Dist: pandas
+Requires-Dist: numpy
+Requires-Dist: arxiv
+Requires-Dist: openai==1.29.0
+Requires-Dist: tiktoken
+Requires-Dist: Pillow
+
+A package for the AskHarrison, including various GenAI tools
