@@ -2,3 +2,4 @@ streamlit
 requests
 pyarxiv
 transformers
+openai==1.59.9
