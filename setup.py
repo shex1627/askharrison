@@ -22,6 +22,7 @@ setup(
         "arxiv",
         "openai==1.29.0",
         "tiktoken",
-        "Pillow",            
+        "Pillow",
+        "baml-py==0.73.4"          
         ]
 )

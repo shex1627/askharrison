@@ -8,7 +8,7 @@ from askharrison.llm.token_util import get_token_count
 
 class ParsingConfig(BaseModel):
     max_chunk_size: int = Field(default=4000, description="Maximum tokens per LLM call")
-    batch_strategy: str = Field(default="truncate", description="Strategy for large docs: truncate/batch")
+    batch_strategy: str = Field(default="batch", description="Strategy for large docs: truncate/batch")
     combine_outputs: bool = Field(default=True, description="Whether to combine multiple outputs")
 
 class DocumentParser:
@@ -69,7 +69,9 @@ class DocumentParser:
             )
         
         # Batch processing
+        print("Document too large, splitting into chunks")
         chunks = self._split_document(document)
+        print(f"Document too large, splitting into {len(chunks)} chunks")
         results = [self._parse_chunk(chunk, schema) for chunk in chunks]
         
         if self.config.combine_outputs:

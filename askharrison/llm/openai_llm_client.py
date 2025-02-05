@@ -2,8 +2,11 @@ from openai import OpenAI
 from askharrison.llm.llm_client import LLMClient
 
 class OpenAIClient(LLMClient):
-    def __init__(self):
-        self.client = OpenAI()
+    def __init__(self, api_key: str):
+        if not api_key:
+            self.client = OpenAI()
+        else:
+            self.client = OpenAI(api_key=api_key)
 
     def generate(self, question: str, model: str = 'gpt-4o', messages=[]) -> str:
         """

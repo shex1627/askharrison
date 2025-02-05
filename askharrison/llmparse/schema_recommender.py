@@ -46,6 +46,10 @@ class SchemaGenerator:
             "resume": ResumeSchema,
             "support_ticket": SupportTicketSchema
         }
+        self.message_history = []
+
+    def clear_message_history(self):
+        self.message_history = []
     
     def _create_schema_generation_prompt(self, description: str) -> str:
         return f"""
@@ -74,10 +78,25 @@ class SchemaGenerator:
         2. A JSON schema for parsing similar documents
         
         Document:
-        {document_trunct}...  # Using first 1000 chars for analysis
+        {document_trunct}...  # Using first {max_tokens} tokens for analysis
+
+        Output the schema in valid JSON format.
+        example output:
+        {{
+            "description": "<your description>",
+            "schema": {{
+                "field1": "type1",
+                "field2": "type2",
+                ...
+            }}
+        }}
         """
         response = self.llm_client.generate(prompt)
         schema = safe_eval(extract_python_code(response))
+        if not schema:
+            return response
+        self.message_history.append({"role": "user", "content": document})
+        self.message_history.append({"role": "assistant", "content": schema})
         return schema
 
     def generate_schema_from_description(self, description: str) -> BaseModel:
@@ -89,37 +108,39 @@ class SchemaGenerator:
         schema_dict = safe_eval(extract_python_code(response))
         if not schema_dict:
             return response
+        self.message_history.append({"role": "user", "content": description})
+        self.message_history.append({"role": "assistant", "content": schema_dict})
         return schema_dict #self._create_pydantic_model(schema_dict)
     
-    def _create_pydantic_model(self, schema_dict: Dict) -> BaseModel:
+    def update_schema_from_feedback(self, schema: BaseModel, feedback: str, last_n:int=3) -> BaseModel:
         """
-        Dynamically creates a Pydantic model from schema dictionary.
+        Updates the schema based on user feedback.
         """
-        fields = {}
-        for field_name, field_info in schema_dict.get("properties", {}).items():
-            field_type = self._map_type(field_info["type"])
-            field = Field(
-                default=None,
-                description=field_info.get("description", ""),
-            )
-            fields[field_name] = (field_type, field)
-        
-        # Create dynamic model inheriting from BaseOutputSchema
-        model = create_model(
-            schema_dict.get("title", "DynamicSchema"),
-            __base__=BaseOutputSchema,
-            **fields
-        )
-        return model
-
-    def _map_type(self, type_str: str) -> type:
-        """Maps JSON schema types to Python types"""
-        type_mapping = {
-            "string": str,
-            "integer": int,
-            "number": float,
-            "boolean": bool,
-            "array": list,
-            "object": dict
-        }
-        return type_mapping.get(type_str, str)
+        context = []
+        if self.message_history:
+            # use last n messages as context
+            context.append(self.message_history[:-last_n])
+        #context = "\n".join([f"{m['role']}: {m['content']}" for m in context])
+        prompt = f"""
+        Given the schema: {schema} and feedback: {feedback}, 
+        suggest improvements to the schema.
+        Output the updated schema in valid JSON format.
+        #### conversation history:
+        {context}
+        #### example output:
+        {{
+            "description": "<your description>",
+            "schema": {{
+                "field1": "type1",
+                "field2": "type2",
+                ...
+            }}
+        }}
+        """
+        response = self.llm_client.generate(prompt)
+        updated_schema_dict = safe_eval(extract_python_code(response))
+        if not updated_schema_dict:
+            return response
+        self.message_history.append({"role": "user", "content": feedback})
+        self.message_history.append({"role": "assistant", "content": updated_schema_dict})
+        return updated_schema_dict

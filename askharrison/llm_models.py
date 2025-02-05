@@ -10,6 +10,7 @@ import random
 from tqdm import tqdm
 import functools
 import tiktoken
+import json
 
 def process_question(question: str, model: str = 'gpt-4o') -> str:
     """
@@ -44,8 +45,8 @@ def polish_code(code: str) -> str:
         str: Polished code.
 
     """
-    if re.match(r"^(python|py)", code):
-        code = re.sub(r"^(python|py)", "", code)
+    if re.match(r"^(python|py|json)", code):
+        code = re.sub(r"^(python|py|json)", "", code)
     if re.match(r"^`.*`$", code):
         code = re.sub(r"^`(.*)`$", r"\1", code)
     code = code.strip()
@@ -76,10 +77,14 @@ def extract_python_code(response: str, separator: str = "```") -> str:
     return code
 
 def safe_eval(input_str: str, default_output: Any=None):
+    """try evaling or using json.loads on a string, return default_output if it fails"""
     try:
         return eval(input_str)
     except:
-        return default_output
+        try:
+            return json.loads(input_str)
+        except:
+            return default_output
 
 def parallel_llm_processor(prompts: List[str], 
                            llm_function: Callable[[str], Any], 
