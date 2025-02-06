@@ -87,6 +87,8 @@ class StreamlitApp:
             st.session_state.problem = ""
         if 'query_type' not in st.session_state:
             st.session_state.query_type = "normal"
+        if 'top_k' not in st.session_state:
+            st.session_state['top_k'] = 10
         if 'num_queries' not in st.session_state:
             st.session_state.num_queries = 10
         if 'expanded_queries' not in st.session_state:
@@ -144,6 +146,7 @@ class StreamlitApp:
                                                 index=querytype_to_index[st.session_state.query_type]
                                                )
         st.session_state.num_queries = st.slider("Number of queries to generate:", 5, 20, st.session_state.num_queries)
+        st.session_state['top_k'] = st.slider("Number of results to rerank:", min_value=10, max_value=30, value=10)
 
         if st.button("Search"):
             if st.session_state.problem:
@@ -166,7 +169,7 @@ class StreamlitApp:
 
             with st.spinner("Reranking results..."):
                 st.session_state.reranked_results = self.search_service.rerank_results(
-                    st.session_state.problem, st.session_state.search_results, top_k=10
+                    st.session_state.problem, st.session_state.search_results, top_k=st.session_state.top_k
                 )
 
         except Exception as e:
