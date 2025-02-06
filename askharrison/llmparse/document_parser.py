@@ -5,6 +5,7 @@ import json
 from enum import Enum
 from askharrison.llmparse.schema_recommender import SchemaGenerator
 from askharrison.llm.token_util import get_token_count
+from askharrison.llm_models import extract_python_code, safe_eval
 
 class ParsingConfig(BaseModel):
     max_chunk_size: int = Field(default=4000, description="Maximum tokens per LLM call")
@@ -70,12 +71,12 @@ class DocumentParser:
         
         # Batch processing
         print("Document too large, splitting into chunks")
-        chunks = self._split_document(document)
+        chunks = self._split_document_by_tokens(document)
         print(f"Document too large, splitting into {len(chunks)} chunks")
         results = [self._parse_chunk(chunk, schema) for chunk in chunks]
         
-        if self.config.combine_outputs:
-            return self._combine_results(results)
+        #if self.config.combine_outputs:
+        #    return self._combine_results(results)
         return results
 
     def _parse_chunk(self, chunk: str, schema: Union[Dict, str]) -> Dict:
@@ -139,6 +140,12 @@ class DocumentParser:
             current_pos = chunk_end
             
         return chunks
+    
+    def _split_document_by_tokens(self, document: str) -> List[str]:
+        """Split document into chunks based on token count"""
+        # Placeholder for token-based splitting
+        from askharrison.llm.token_util import split_documents
+        return split_documents(document, self.config.max_chunk_size)
 
     def _combine_results(self, results: List[Dict]) -> Dict:
         """Combine multiple parsing results into one"""
@@ -164,4 +171,8 @@ class DocumentParser:
             # Add fallback parsing if needed
             #raise ValueError("Invalid JSON in LLM response")
             print("Invalid JSON in LLM response, returning raw response")
-            return response
+            try:
+                return safe_eval(extract_python_code(response))
+            except Exception as e:
+                print(f"Error parsing response: {e}")
+                return response

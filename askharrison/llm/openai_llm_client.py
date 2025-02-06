@@ -2,7 +2,7 @@ from openai import OpenAI
 from askharrison.llm.llm_client import LLMClient
 
 class OpenAIClient(LLMClient):
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str=None):
         if not api_key:
             self.client = OpenAI()
         else:
