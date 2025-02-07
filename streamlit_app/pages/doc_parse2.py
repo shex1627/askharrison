@@ -106,43 +106,60 @@ if uploaded_file and st.session_state.api_key:
                 st.error(f"Error generating schema: {str(e)}")
     
     # Schema display and editing
+    # Schema display and editing
     if st.session_state.schema:
-        schema_json = json.dumps(st.session_state.schema, indent=2)
-        edited_schema = st.text_area(
-            "Edit Schema (JSON)", 
-            schema_json,
-            height=300
-        )
-        try:
-            st.session_state.schema = json.loads(edited_schema)
-        except json.JSONDecodeError as e:
-            st.error(f"Invalid JSON: {str(e)}")
+        col1, col2 = st.columns([2,1])
+        with col1:
+            schema_json = json.dumps(st.session_state.schema, indent=2)
+            edited_schema = st.text_area(
+                "Edit Schema (JSON)", 
+                schema_json,
+                height=300,
+                key="schema_editor"
+            )
+            try:
+                if edited_schema != schema_json:
+                    st.session_state.schema = json.loads(edited_schema)
+                    if "messages" not in st.session_state:
+                        st.session_state.messages = []
+                    st.session_state.messages.append({
+                        "role": "system",
+                        "content": "Schema updated through manual edit"
+                    })
+            except json.JSONDecodeError as e:
+                st.error(f"Invalid JSON: {str(e)}")
     
         # Schema feedback chat
-        st.header("Schema Refinement Chat")
+        with col2:
+            st.header("Schema Refinement Chat")
+            
+            # Initialize messages if not exists
+            if "messages" not in st.session_state:
+                st.session_state.messages = []
+            
+            # Display chat messages
+            for message in st.session_state.messages:
+                with st.chat_message(message["role"]):
+                    st.write(message["content"])
         
-        # Display chat messages
-        for message in st.session_state.chat_messages:
-            with st.chat_message(message["role"]):
-                st.write(message["content"])
-        
-        # Chat input for schema feedback
-        if feedback := st.chat_input("Provide feedback to refine the schema"):
-            st.session_state.chat_messages.append({"role": "user", "content": feedback})
-            try:
-                updated_schema = st.session_state.schema_generator.update_schema_from_feedback(
-                    st.session_state.schema,
-                    feedback
-                )
-                st.session_state.schema = updated_schema
-                st.session_state.chat_messages.append({
-                    "role": "assistant",
-                    "content": f"Updated schema based on feedback:\n```json\n{json.dumps(updated_schema, indent=2)}\n```"
-                })
-                print("Updated schema:")
-                print(updated_schema)
-            except Exception as e:
-                st.error(f"Error updating schema: {str(e)}")
+            # Chat input for schema feedback
+            if feedback := st.chat_input("Provide feedback to refine the schema"):
+                st.session_state.chat_messages.append({"role": "user", "content": feedback})
+                try:
+                    updated_schema = st.session_state.schema_generator.update_schema_from_feedback(
+                        st.session_state.schema,
+                        feedback
+                    )
+                    st.session_state.schema = updated_schema
+                    st.session_state.chat_messages.append({
+                            "role": "assistant",
+                            "content": f"✅ Schema updated based on your feedback: '{feedback}'"
+                    })
+                    print("Updated schema:")
+                    print(updated_schema)
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"Error updating schema: {str(e)}")
         
         # Parsing section
         st.header("Document Parsing")

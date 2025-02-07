@@ -93,14 +93,16 @@ class DocumentParser:
         #     f"- {field_name}: {props.get('description', '')}"
         #     for field_name, props in fields.items()
         # ])
-        if isinstance(schema, dict):
-            fields = schema.get("properties", {})
-            fields_desc = "\n".join([
-                f"- {field_name}: {props.get('description', '')}"
-                for field_name, props in fields.items()
-            ])
-        else:
-            fields_desc = schema
+        # if isinstance(schema, dict):
+        #     fields = schema.get("properties", {})
+        #     fields_desc = "\n".join([
+        #         f"- {field_name}: {props.get('description', '')}"
+        #         for field_name, props in fields.items()
+        #     ])
+        # else:
+        #     fields_desc = schema
+        fields_desc = str(schema)
+        print(f"Fields description:\n{fields_desc}")
 
         return f"""
         Extract information from the following text according to this structure:
