@@ -146,7 +146,7 @@ class StreamlitApp:
                                                 index=querytype_to_index[st.session_state.query_type]
                                                )
         st.session_state.num_queries = st.slider("Number of queries to generate:", 5, 20, st.session_state.num_queries)
-        st.session_state['top_k'] = st.slider("Number of results to rerank:", min_value=10, max_value=30, value=10)
+        st.session_state['top_k'] = st.slider("Number of results to rerank:", min_value=10, max_value=50, value=10)
 
         if st.button("Search"):
             if st.session_state.problem:
