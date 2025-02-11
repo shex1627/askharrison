@@ -8,7 +8,7 @@ from askharrison.llm.token_util import get_token_count
 from askharrison.llm_models import extract_python_code, safe_eval
 
 class ParsingConfig(BaseModel):
-    max_chunk_size: int = Field(default=4000, description="Maximum tokens per LLM call")
+    max_chunk_size: int = Field(default=3000, description="Maximum tokens per LLM call")
     batch_strategy: str = Field(default="batch", description="Strategy for large docs: truncate/batch")
     combine_outputs: bool = Field(default=True, description="Whether to combine multiple outputs")
 
