@@ -3,3 +3,4 @@ requests
 pyarxiv
 transformers
 openai==1.59.9
+anthropic
