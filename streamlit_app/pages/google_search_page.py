@@ -20,7 +20,10 @@ logger = logging.getLogger(__name__)
 page_icon = Image.open("./icon.jpg")
 # Streamlit App
 st.set_page_config(page_title="Advanced Search App", 
-                page_icon=page_icon, layout="wide")
+    page_icon=page_icon,
+    layout="centered",  # Change from "wide" to "centered"
+    initial_sidebar_state="expanded"
+)
 
 @dataclass
 class SearchResult:
@@ -195,7 +198,50 @@ class StreamlitApp:
         base_filename = self._get_base_filename()
 
         st.subheader("LLM Reranked Results")
-        st.dataframe(st.session_state.reranked_results)
+        df_display = st.session_state.reranked_results.copy()
+        df_display['Relevance Score'] = df_display['overall'].apply(int)
+        df_display = df_display[['title', 'link', 'snippet', 'Relevance Score']]
+
+        # Add custom CSS for more compact cards
+        st.markdown("""
+            <style>
+            .search-result-card {
+                padding: 0.5rem 0;
+                margin: 0.05rem 0;
+            }
+            .search-result-card h4 {
+                margin: 0;
+                font-size: 1rem;
+                line-height: 1.2;
+            }
+            .search-result-card p {
+                margin: 0.05rem 0;
+                font-size: 0.9rem;
+                line-height: 1.2;
+            }
+            .url-text {
+                color: #666;
+                font-size: 0.75rem;
+                word-wrap: break-word;
+                margin-top: 0.1rem !important;
+            }
+            hr {
+                margin: 0.5rem 0 !important;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+
+        # Display each result as a more compact card
+        for _, row in df_display.iterrows():
+            with st.container():
+                st.markdown(f'<div class="search-result-card">', unsafe_allow_html=True)
+                st.markdown(f"#### [{row['title']}]({row['link']})")
+                st.markdown(f'<p><strong>Relevance Score:</strong> {row["Relevance Score"]}</p>', unsafe_allow_html=True)
+                st.markdown(f'<p><strong>Summary:</strong> {row["snippet"]}</p>', unsafe_allow_html=True)
+                st.markdown(f'<p class="url-text">{row["link"]}</p>', unsafe_allow_html=True)
+                st.markdown("---")
+                st.markdown('</div>', unsafe_allow_html=True)
+
         self._add_export_option(st.session_state.reranked_results, f"{base_filename}_reranked.csv")
 
         col1, col2 = st.columns(2)
