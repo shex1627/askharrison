@@ -1,4 +1,4 @@
-Metadata-Version: 2.1
+Metadata-Version: 2.2
 Name: askharrison
 Version: 0.1.2rc0
 Summary: A package for the AskHarrison, including various GenAI tools
@@ -15,5 +15,10 @@ Requires-Dist: arxiv
 Requires-Dist: openai==1.29.0
 Requires-Dist: tiktoken
 Requires-Dist: Pillow
+Dynamic: description
+Dynamic: home-page
+Dynamic: project-url
+Dynamic: requires-dist
+Dynamic: summary
 
 A package for the AskHarrison, including various GenAI tools
